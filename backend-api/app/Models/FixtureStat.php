@@ -3,6 +3,7 @@
 namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
 class FixtureStat extends Model
 {
@@ -13,12 +14,32 @@ class FixtureStat extends Model
         'player_statistics',
     ];
 
-    protected $casts = [
-        'team_statistics' => 'array',
-        'player_statistics' => 'array',
-    ];
+    /**
+     * Definición de casts para manejar los datos JSON como arrays de PHP.
+     */
+    protected function casts(): array
+    {
+        return [
+            'team_statistics'   => 'array',
+            'player_statistics' => 'array',
+        ];
+    }
 
-    public function fixture() {
+    /* --- RELACIONES --- */
+
+    /**
+     * Relación con el partido.
+     */
+    public function fixture(): BelongsTo
+    {
         return $this->belongsTo(Fixture::class);
+    }
+
+    /**
+     * Relación con el equipo usando el ID de la API.
+     */
+    public function team(): BelongsTo
+    {
+        return $this->belongsTo(Team::class, 'team_api_id', 'api_id');
     }
 }
