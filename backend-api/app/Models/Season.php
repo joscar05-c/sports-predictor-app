@@ -3,6 +3,8 @@
 namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Database\Eloquent\Relations\HasMany;
 
 class Season extends Model
 {
@@ -15,13 +17,35 @@ class Season extends Model
         'coverage',
     ];
 
-    protected $casts = [
-        'coverage' => 'array', //para que se convierta automáticamente a array al acceder
-        'is_current' => 'boolean',
-    ];
+    /**
+     * Casts de Laravel 12 para fechas, booleanos y el objeto JSON de cobertura.
+     */
+    protected function casts(): array
+    {
+        return [
+            'year'       => 'integer',
+            'start'      => 'date',
+            'end'        => 'date',
+            'is_current' => 'boolean',
+            'coverage'   => 'array', // Aquí viene la magia para el frontend
+        ];
+    }
 
-    public function league()
+    /* --- RELACIONES --- */
+
+    /**
+     * Una temporada pertenece a una liga.
+     */
+    public function league(): BelongsTo
     {
         return $this->belongsTo(League::class);
+    }
+
+    /**
+     * Una temporada tiene muchos partidos (fixtures).
+     */
+    public function fixtures(): HasMany
+    {
+        return $this->hasMany(Fixture::class);
     }
 }
