@@ -3,6 +3,7 @@
 namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
 class Prediction extends Model
 {
@@ -22,9 +23,34 @@ class Prediction extends Model
         'teams_analysis',
     ];
 
-    protected $casts = [
-        'win_or_draw' => 'boolean',
-        'comparison_stats' => 'array',
-        'teams_analysis' => 'array',
-    ];
+    /**
+     * Los casts modernos de Laravel 12 para manejar booleanos y JSON.
+     */
+    protected function casts(): array
+    {
+        return [
+            'win_or_draw' => 'boolean',
+            'comparison_stats' => 'array', // Form, attack, defense, etc.
+            'teams_analysis' => 'array',   // Snapshot de los equipos
+        ];
+    }
+
+    /* --- RELACIONES --- */
+
+    /**
+     * Una predicción pertenece a un partido específico.
+     */
+    public function fixture(): BelongsTo
+    {
+        return $this->belongsTo(Fixture::class);
+    }
+
+    /**
+     * El equipo que se predice como ganador.
+     * Relacionamos con Team usando el api_id.
+     */
+    public function winnerTeam(): BelongsTo
+    {
+        return $this->belongsTo(Team::class, 'winner_team_api_id', 'api_id');
+    }
 }
