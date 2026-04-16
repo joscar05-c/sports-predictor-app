@@ -16,12 +16,47 @@ class League extends Model
         'country_code',
         'country_flag',
     ];
+    /**
+     * Casts para asegurar que el ID de la API se trate como un entero largo.
+     */
+    protected function casts(): array
+    {
+        return [
+            'api_id' => 'integer',
+        ];
+    }
 
-    public function seasons()
+    /* --- RELACIONES --- */
+
+    /**
+     * Una liga tiene muchas temporadas asociadas.
+     */
+    public function seasons(): HasMany
     {
         return $this->hasMany(Season::class);
     }
 
-    public function teams(): HasMany{ return $this->hasMany(Team::class); }
-    public function fixtures(): HasMany{ return $this->hasMany(Fixture::class); }
+    /**
+     * Una liga tiene muchos equipos registrados en ella.
+     */
+    public function teams(): HasMany
+    {
+        return $this->hasMany(Team::class);
+    }
+
+    /**
+     * Una liga tiene muchos partidos (fixtures).
+     */
+    public function fixtures(): HasMany
+    {
+        return $this->hasMany(Fixture::class);
+    }
+
+    /**
+     * Una liga tiene sus tablas de posiciones (standings).
+     */
+    public function standings(): HasMany
+    {
+        return $this->hasMany(Standing::class);
+    }
 }
