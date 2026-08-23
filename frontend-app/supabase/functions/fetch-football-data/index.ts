@@ -108,41 +108,49 @@ async function upsertLeagues(
 
   let inserted = 0;
   let updated = 0;
+  const errors: string[] = [];
 
   for (const item of response) {
     const l = item.league;
     const country = l.country ?? {};
 
-    const { data: existing } = await supabase
+    const { data: existing, error: selErr } = await supabase
       .from("leagues")
       .select("id")
       .eq("api_id", l.id)
       .single();
 
+    if (selErr && selErr.code !== "PGRST116") {
+      errors.push(`sel league ${l.id}: ${selErr.message}`);
+      continue;
+    }
+
     if (existing) {
-      await supabase
+      const { error: updErr } = await supabase
         .from("leagues")
         .update({
           name: l.name,
           type: l.type,
           logo: l.logo,
-          country_name: country.name,
-          country_code: country.code,
-          country_flag: country.flag,
+          country_name: country.name ?? "Unknown",
+          country_code: country.code ?? null,
+          country_flag: country.flag ?? null,
         })
         .eq("api_id", l.id);
-      updated++;
+      if (updErr) errors.push(`upd league ${l.id}: ${updErr.message}`);
+      else updated++;
     } else {
-      await supabase.from("leagues").insert({
+      const { error: insErr } = await supabase.from("leagues").insert({
         api_id: l.id,
         name: l.name,
         type: l.type,
         logo: l.logo,
-        country_name: country.name,
-        country_code: country.code,
-        country_flag: country.flag,
+        country_name: country.name ?? "Unknown",
+        country_code: country.code ?? null,
+        country_flag: country.flag ?? null,
       });
-      inserted++;
+      if (insErr) errors.push(`ins league ${l.id}: ${insErr.message}`);
+      else inserted++;
     }
 
     // Upsert seasons for this league
@@ -169,7 +177,7 @@ async function upsertLeagues(
     }
   }
 
-  return { inserted, updated, total: response.length };
+  return { inserted, updated, total: response.length, errors };
 }
 
 // ──────────────────────────────────────────────
@@ -350,17 +358,17 @@ async function upsertFixtures(
       .eq("api_id", f.id)
       .single();
 
-    const leagueId = await getLeagueId(supabase, f.league.id);
+    const leagueId = await getLeagueId(supabase, item.league.id);
     if (!leagueId) {
-      console.warn(`[fixtures] Skipping fixture ${f.id}: league ${f.league.id} not found`);
+      console.warn(`[fixtures] Skipping fixture ${f.id}: league ${item.league.id} not found`);
       continue;
     }
 
     const fixtureRow = {
       api_id: f.id,
       league_id: leagueId,
-      season: f.league.season,
-      round: f.league.round,
+      season: item.league.season,
+      round: item.league.round,
       referee: f.referee || null,
       date: f.date,
       timezone: f.timezone,
@@ -810,7 +818,7 @@ Deno.serve(async (req): Promise<Response> => {
         return errorResponse(`Endpoint "${endpoint}" not implemented yet`);
     }
 
-    console.log(`[fetch-football-data] Done:`, result);
+    console.log(`[fetch-football-data] Done:`, JSON.stringify(result));
 
     return successResponse({
       endpoint,

@@ -1,0 +1,69 @@
+<ion-header [translucent]="true">
+  <ion-toolbar color="dark">
+    <ion-buttons slot="start">
+      <ion-back-button defaultHref="/home" text="" icon="arrow-back-outline"></ion-back-button>
+    </ion-buttons>
+    <ion-title>Tabla de Posiciones</ion-title>
+  </ion-toolbar>
+</ion-header>
+
+<ion-content [fullscreen]="true" color="dark">
+  @if (loading()) {
+    <div class="loading-container">
+      <ion-spinner name="crescent" color="primary"></ion-spinner>
+      <p>Cargando clasificación...</p>
+    </div>
+  } @else if (error()) {
+    <div class="error-container">
+      <h3>Error</h3>
+      <p>{{ error() }}</p>
+    </div>
+  } @else if (standings().length === 0) {
+    <div class="empty-container">
+      <p>No hay datos de clasificación disponibles</p>
+    </div>
+  } @else {
+    <div class="standings-table">
+      <!-- Table header -->
+      <div class="standing-row header-row">
+        <span class="col col-pos">#</span>
+        <span class="col col-team">Equipo</span>
+        <span class="col col-stat">PJ</span>
+        <span class="col col-stat">PG</span>
+        <span class="col col-stat">PE</span>
+        <span class="col col-stat">PP</span>
+        <span class="col col-stat">DG</span>
+        <span class="col col-pts">Pts</span>
+        <span class="col col-form">Forma</span>
+      </div>
+
+      <!-- Standing rows -->
+      @for (s of standings(); track s.id) {
+        <div class="standing-row" [class.champion]="s.rank === 1" [class.relegation]="s.rank >= 18">
+          <span class="col col-pos">
+            <span class="rank-badge" [attr.data-rank]="s.rank">{{ s.rank }}</span>
+          </span>
+          <span class="col col-team">
+            <img [src]="s.team.logo" class="team-logo" alt="" />
+            <span class="team-name">{{ s.team.name }}</span>
+          </span>
+          <span class="col col-stat">{{ s.stats_detail.all.played ?? '-' }}</span>
+          <span class="col col-stat">{{ s.stats_detail.all.win ?? '-' }}</span>
+          <span class="col col-stat">{{ s.stats_detail.all.draw ?? '-' }}</span>
+          <span class="col col-stat">{{ s.stats_detail.all.lose ?? '-' }}</span>
+          <span class="col col-stat" [class.positive]="s.goals_diff > 0" [class.negative]="s.goals_diff < 0">
+            {{ s.goals_diff > 0 ? '+' : '' }}{{ s.goals_diff }}
+          </span>
+          <span class="col col-pts">{{ s.points }}</span>
+          <span class="col col-form">
+            @for (result of getFormIcons(s.form); track $index) {
+              <ion-badge [color]="getFormColor(result)" class="form-badge">
+                {{ result }}
+              </ion-badge>
+            }
+          </span>
+        </div>
+      }
+    </div>
+  }
+</ion-content>

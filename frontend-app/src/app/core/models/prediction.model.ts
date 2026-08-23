@@ -59,7 +59,7 @@ export interface TeamAnalysis {
   };
   clean_sheet: { home: number; away: number; total: number };
   failed_to_score: { home: number; away: number; total: number };
-  penalty: { scored: { total: number; percentage: string }; missed: { total: number; total: number; percentage: string } };
+  penalty: { scored: { total: number; percentage: string }; missed: { total: number; percentage: string } };
   lineups: Array<{ formation: string; played: number }>;
   cards: {
     yellow: Array<{ minute: string; total: number }>;

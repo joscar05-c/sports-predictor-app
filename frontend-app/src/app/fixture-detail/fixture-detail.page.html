@@ -1,0 +1,271 @@
+<ion-header [translucent]="true">
+  <ion-toolbar color="dark">
+    <ion-buttons slot="start">
+      <ion-back-button defaultHref="/home" text="" icon="arrow-back-outline"></ion-back-button>
+    </ion-buttons>
+    <ion-title>Detalle del Partido</ion-title>
+  </ion-toolbar>
+</ion-header>
+
+<ion-content [fullscreen]="true" color="dark">
+  @if (loading()) {
+    <div class="loading-container">
+      <ion-spinner name="crescent" color="primary"></ion-spinner>
+      <p>Cargando partido...</p>
+    </div>
+  } @else if (error()) {
+    <div class="error-container">
+      <ion-icon name="football-outline" color="danger"></ion-icon>
+      <h3>Error</h3>
+      <p>{{ error() }}</p>
+      <ion-button (click)="ngOnInit()" fill="outline">Reintentar</ion-button>
+    </div>
+  } @else if (fixture(); as f) {
+    <!-- Match Header -->
+    <div class="match-header">
+      <div class="league-info">
+        <img [src]="f.league.logo" class="league-logo" alt="" />
+        <span>{{ f.league.name }} - {{ f.round }}</span>
+      </div>
+
+      <div class="teams-score">
+        <div class="team">
+          <img [src]="f.home_team.logo ?? 'assets/icon/favicon.png'" class="team-logo" alt="" />
+          <span class="team-name">{{ f.home_team.name ?? 'Local' }}</span>
+        </div>
+
+        <div class="score-block">
+          <span class="score">{{ f.goals_home ?? 0 }} - {{ f.goals_away ?? 0 }}</span>
+          <span class="status">{{ f.status_long }}</span>
+          @if (f.elapsed) {
+            <span class="elapsed">{{ f.elapsed }} min</span>
+          }
+        </div>
+
+        <div class="team">
+          <img [src]="f.away_team.logo ?? 'assets/icon/favicon.png'" class="team-logo" alt="" />
+          <span class="team-name">{{ f.away_team.name ?? 'Visitante' }}</span>
+        </div>
+      </div>
+
+      <div class="match-info">
+        <span>{{ formatDateTime(f.date) }}</span>
+        @if (f.venue) {
+          <span>{{ f.venue.name }}, {{ f.venue.city }}</span>
+        }
+        @if (f.referee) {
+          <span>Arbitro: {{ f.referee }}</span>
+        }
+      </div>
+    </div>
+
+    <!-- Tabs -->
+    <ion-segment [value]="activeTab()" (ionChange)="onTabChange($event)" color="primary">
+      <ion-segment-button value="prediction">
+        <ion-label>Predicción</ion-label>
+      </ion-segment-button>
+      <ion-segment-button value="stats">
+        <ion-label>Estadísticas</ion-label>
+      </ion-segment-button>
+      <ion-segment-button value="lineups">
+        <ion-label>Alineaciones</ion-label>
+      </ion-segment-button>
+      <ion-segment-button value="odds">
+        <ion-label>Cuotas</ion-label>
+      </ion-segment-button>
+    </ion-segment>
+
+    <!-- Tab: Prediction -->
+    @if (activeTab() === 'prediction') {
+      @if (prediction(); as pred) {
+        <div class="tab-content">
+          <!-- Probabilities -->
+          <ion-card color="dark">
+            <ion-card-content>
+              <h4>Probabilidades</h4>
+              <div class="probability-bars">
+                <div class="prob-row">
+                  <span class="prob-label">{{ f.home_team.name }}</span>
+                  <div class="prob-bar">
+                    <div class="prob-fill home" [style.width]="pred.percent_home ?? '0%'"></div>
+                  </div>
+                  <span class="prob-value" [attr.color]="getPercentColor(pred.percent_home)">
+                    {{ pred.percent_home ?? '-' }}
+                  </span>
+                </div>
+                <div class="prob-row">
+                  <span class="prob-label">Empate</span>
+                  <div class="prob-bar">
+                    <div class="prob-fill draw" [style.width]="pred.percent_draw ?? '0%'"></div>
+                  </div>
+                  <span class="prob-value" [attr.color]="getPercentColor(pred.percent_draw)">
+                    {{ pred.percent_draw ?? '-' }}
+                  </span>
+                </div>
+                <div class="prob-row">
+                  <span class="prob-label">{{ f.away_team.name }}</span>
+                  <div class="prob-bar">
+                    <div class="prob-fill away" [style.width]="pred.percent_away ?? '0%'"></div>
+                  </div>
+                  <span class="prob-value" [attr.color]="getPercentColor(pred.percent_away)">
+                    {{ pred.percent_away ?? '-' }}
+                  </span>
+                </div>
+              </div>
+            </ion-card-content>
+          </ion-card>
+
+          <!-- Advice -->
+          @if (pred.advice) {
+            <ion-card color="dark">
+              <ion-card-content>
+                <h4>Consejo</h4>
+                <p class="advice-text">{{ pred.advice }}</p>
+              </ion-card-content>
+            </ion-card>
+          }
+
+          <!-- Prediction details -->
+          <ion-card color="dark">
+            <ion-card-content>
+              <div class="pred-grid">
+                @if (pred.winner_comment) {
+                  <div class="pred-item">
+                    <span class="pred-label">Ganador</span>
+                    <span class="pred-value">{{ pred.winner_comment }}</span>
+                  </div>
+                }
+                @if (pred.under_over) {
+                  <div class="pred-item">
+                    <span class="pred-label">Over/Under</span>
+                    <span class="pred-value">{{ pred.under_over }}</span>
+                  </div>
+                }
+                @if (pred.goals_home) {
+                  <div class="pred-item">
+                    <span class="pred-label">Goles Local</span>
+                    <span class="pred-value">{{ pred.goals_home }}</span>
+                  </div>
+                }
+                @if (pred.goals_away) {
+                  <div class="pred-item">
+                    <span class="pred-label">Goles Visitante</span>
+                    <span class="pred-value">{{ pred.goals_away }}</span>
+                  </div>
+                }
+              </div>
+            </ion-card-content>
+          </ion-card>
+        </div>
+      } @else {
+        <div class="empty-tab">
+          <ion-icon name="analytics-outline"></ion-icon>
+          <p>No hay predicción disponible para este partido</p>
+        </div>
+      }
+    }
+
+    <!-- Tab: Stats -->
+    @if (activeTab() === 'stats') {
+      @if (f.statistics && f.statistics.length > 0) {
+        <div class="tab-content">
+          @for (stat of f.statistics; track stat.id) {
+            <ion-card color="dark">
+              <ion-card-content>
+                <h4>Equipo ID: {{ stat.team_api_id }}</h4>
+                <ion-list>
+                  @for (s of stat.team_statistics; track s.type) {
+                    <ion-item color="dark">
+                      <ion-label>{{ s.type }}</ion-label>
+                      <ion-label slot="end">{{ s.value }}</ion-label>
+                    </ion-item>
+                  }
+                </ion-list>
+              </ion-card-content>
+            </ion-card>
+          }
+        </div>
+      } @else {
+        <div class="empty-tab">
+          <ion-icon name="stats-chart-outline"></ion-icon>
+          <p>No hay estadísticas disponibles</p>
+        </div>
+      }
+    }
+
+    <!-- Tab: Lineups -->
+    @if (activeTab() === 'lineups') {
+      @if (f.lineups && f.lineups.length > 0) {
+        <div class="tab-content">
+          @for (lineup of f.lineups; track lineup.id) {
+            <ion-card color="dark">
+              <ion-card-header>
+                <ion-card-title>
+                  Equipo ID: {{ lineup.team_api_id }} - {{ lineup.formation }}
+                </ion-card-title>
+              </ion-card-header>
+              <ion-card-content>
+                <h5>Titulares</h5>
+                @for (p of lineup.start_xi; track p.player.id) {
+                  <div class="player-row">
+                    <span class="player-number">{{ p.player.number }}</span>
+                    <span class="player-name">{{ p.player.name }}</span>
+                    <ion-chip color="medium" class="player-pos">{{ p.player.pos }}</ion-chip>
+                  </div>
+                }
+                <h5>Suplentes</h5>
+                @for (p of lineup.substitutes; track p.player.id) {
+                  <div class="player-row">
+                    <span class="player-number">{{ p.player.number }}</span>
+                    <span class="player-name">{{ p.player.name }}</span>
+                    <ion-chip color="medium" class="player-pos">{{ p.player.pos }}</ion-chip>
+                  </div>
+                }
+              </ion-card-content>
+            </ion-card>
+          }
+        </div>
+      } @else {
+        <div class="empty-tab">
+          <ion-icon name="people-outline"></ion-icon>
+          <p>No hay alineaciones disponibles</p>
+        </div>
+      }
+    }
+
+    <!-- Tab: Odds -->
+    @if (activeTab() === 'odds') {
+      @if (odds().length > 0) {
+        <div class="tab-content">
+          @for (odd of odds(); track odd.id) {
+            <ion-card color="dark">
+              <ion-card-header>
+                <ion-card-title>{{ odd.bookmaker.name }}</ion-card-title>
+              </ion-card-header>
+              <ion-card-content>
+                @for (bet of odd.odds_data; track bet.id) {
+                  <div class="bet-group">
+                    <h5>{{ bet.name }}</h5>
+                    <div class="bet-values">
+                      @for (v of bet.values; track v.value) {
+                        <div class="bet-option">
+                          <span class="bet-label">{{ v.value }}</span>
+                          <ion-badge color="primary">{{ v.odd }}</ion-badge>
+                        </div>
+                      }
+                    </div>
+                  </div>
+                }
+              </ion-card-content>
+            </ion-card>
+          }
+        </div>
+      } @else {
+        <div class="empty-tab">
+          <ion-icon name="wallet-outline"></ion-icon>
+          <p>No hay cuotas disponibles</p>
+        </div>
+      }
+    }
+  }
+</ion-content>

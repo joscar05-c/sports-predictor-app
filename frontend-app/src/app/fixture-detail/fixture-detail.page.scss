@@ -1,0 +1,292 @@
+:host {
+  display: block;
+}
+
+.loading-container,
+.error-container {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 60px 20px;
+  text-align: center;
+  gap: 12px;
+
+  ion-icon {
+    font-size: 48px;
+  }
+
+  p {
+    color: var(--ion-text-color-step-500);
+    font-size: 14px;
+  }
+}
+
+.match-header {
+  padding: 16px;
+  text-align: center;
+
+  .league-info {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    margin-bottom: 16px;
+
+    .league-logo {
+      width: 20px;
+      height: 20px;
+      border-radius: 3px;
+    }
+
+    span {
+      font-size: 12px;
+      color: var(--ion-text-color-step-500);
+    }
+  }
+
+  .teams-score {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 16px;
+    margin-bottom: 12px;
+
+    .team {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 8px;
+      width: 90px;
+
+      .team-logo {
+        width: 56px;
+        height: 56px;
+        object-fit: contain;
+      }
+
+      .team-name {
+        font-size: 13px;
+        font-weight: 600;
+        text-align: center;
+      }
+    }
+
+    .score-block {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      min-width: 70px;
+
+      .score {
+        font-size: 32px;
+        font-weight: 800;
+        letter-spacing: 4px;
+      }
+
+      .status {
+        font-size: 11px;
+        color: var(--ion-text-color-step-500);
+      }
+
+      .elapsed {
+        font-size: 12px;
+        color: var(--ion-color-danger);
+        font-weight: 600;
+      }
+    }
+  }
+
+  .match-info {
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+    font-size: 12px;
+    color: var(--ion-text-color-step-400);
+  }
+}
+
+ion-segment {
+  margin: 0 12px 8px;
+  border-radius: 10px;
+}
+
+.tab-content {
+  padding: 8px 0;
+}
+
+// Prediction tab
+.probability-bars {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  margin-top: 8px;
+}
+
+.prob-row {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+
+  .prob-label {
+    width: 100px;
+    font-size: 12px;
+    font-weight: 600;
+    text-align: right;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+
+  .prob-bar {
+    flex: 1;
+    height: 8px;
+    background: rgba(255, 255, 255, 0.08);
+    border-radius: 4px;
+    overflow: hidden;
+
+    .prob-fill {
+      height: 100%;
+      border-radius: 4px;
+      transition: width 0.5s ease;
+
+      &.home {
+        background: var(--ion-color-primary);
+      }
+      &.draw {
+        background: var(--ion-color-medium);
+      }
+      &.away {
+        background: var(--ion-color-danger);
+      }
+    }
+  }
+
+  .prob-value {
+    width: 45px;
+    font-size: 13px;
+    font-weight: 700;
+  }
+}
+
+.advice-text {
+  font-size: 14px;
+  line-height: 1.5;
+  color: var(--ion-text-color-step-700);
+  margin-top: 8px;
+}
+
+.pred-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 12px;
+
+  .pred-item {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+
+    .pred-label {
+      font-size: 11px;
+      color: var(--ion-text-color-step-500);
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+    }
+
+    .pred-value {
+      font-size: 14px;
+      font-weight: 600;
+    }
+  }
+}
+
+.empty-tab {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 48px 20px;
+  text-align: center;
+
+  ion-icon {
+    font-size: 48px;
+    color: var(--ion-text-color-step-300);
+    margin-bottom: 12px;
+  }
+
+  p {
+    font-size: 14px;
+    color: var(--ion-text-color-step-500);
+  }
+}
+
+// Lineups
+.player-row {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 6px 0;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.04);
+
+  .player-number {
+    font-size: 12px;
+    font-weight: 700;
+    color: var(--ion-color-primary);
+    width: 24px;
+    text-align: center;
+  }
+
+  .player-name {
+    flex: 1;
+    font-size: 13px;
+  }
+
+  .player-pos {
+    --background: rgba(255, 255, 255, 0.08);
+    height: 20px;
+    font-size: 10px;
+  }
+}
+
+h4, h5 {
+  margin: 0 0 8px;
+  font-weight: 600;
+}
+
+h5 {
+  font-size: 13px;
+  color: var(--ion-text-color-step-500);
+  margin-top: 12px;
+}
+
+// Odds
+.bet-group {
+  margin-bottom: 16px;
+
+  h5 {
+    margin-bottom: 8px;
+    color: var(--ion-text-color-step-600);
+  }
+}
+
+.bet-values {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.bet-option {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 4px;
+  padding: 8px 12px;
+  background: rgba(255, 255, 255, 0.04);
+  border-radius: 8px;
+  min-width: 60px;
+
+  .bet-label {
+    font-size: 11px;
+    color: var(--ion-text-color-step-500);
+  }
+}

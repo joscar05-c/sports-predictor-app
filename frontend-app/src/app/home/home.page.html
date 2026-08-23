@@ -1,20 +1,130 @@
 <ion-header [translucent]="true">
-  <ion-toolbar>
+  <ion-toolbar color="dark">
     <ion-title>
-      Blank
+      <ion-icon name="football-outline"></ion-icon>
+      Sports Predictor
     </ion-title>
   </ion-toolbar>
 </ion-header>
 
-<ion-content [fullscreen]="true">
+<ion-content [fullscreen]="true" color="dark">
   <ion-header collapse="condense">
-    <ion-toolbar>
-      <ion-title size="large">Blank</ion-title>
+    <ion-toolbar color="dark">
+      <ion-title size="large">Sports Predictor</ion-title>
     </ion-toolbar>
   </ion-header>
 
-  <div id="container">
-    <strong>Ready to create an app?</strong>
-    <p>Start with Ionic <a target="_blank" rel="noopener noreferrer" href="https://ionicframework.com/docs/components">UI Components</a></p>
+  <!-- Refresher -->
+  <ion-refresher slot="fixed" (ionRefresh)="onRefresh($event)">
+    <ion-refresher-content pullingIcon="chevron-down-circle-outline" refreshingSpinner="crescent">
+    </ion-refresher-content>
+  </ion-refresher>
+
+  <!-- Segment: Filtros -->
+  <ion-segment [value]="selectedSegment()" (ionChange)="onSegmentChange($event)" color="primary">
+    <ion-segment-button value="all">
+      <ion-label>Todos</ion-label>
+    </ion-segment-button>
+    <ion-segment-button value="live">
+      <ion-label>En Vivo</ion-label>
+      @if (liveFixtures().length > 0) {
+        <ion-badge color="danger">{{ liveFixtures().length }}</ion-badge>
+      }
+    </ion-segment-button>
+    <ion-segment-button value="upcoming">
+      <ion-label>Próximos</ion-label>
+    </ion-segment-button>
+    <ion-segment-button value="finished">
+      <ion-label>Finalizados</ion-label>
+    </ion-segment-button>
+  </ion-segment>
+
+  <!-- League filter chips -->
+  <div class="league-chips">
+    @for (league of leagues(); track league.api_id) {
+      <ion-chip
+        [outline]="selectedLeagueId() !== league.api_id"
+        [color]="selectedLeagueId() === league.api_id ? 'primary' : 'medium'"
+        (click)="onLeagueFilter(league.api_id)">
+        <ion-label>{{ league.name }}</ion-label>
+      </ion-chip>
+    }
   </div>
+
+  <!-- Loading skeleton -->
+  @if (loading()) {
+    @for (i of [1, 2, 3, 4, 5]; track i) {
+      <ion-card color="dark">
+        <ion-card-header>
+          <ion-skeleton-text animated style="width: 40%; height: 12px;"></ion-skeleton-text>
+        </ion-card-header>
+        <ion-card-content>
+          <div class="skeleton-match">
+            <ion-skeleton-text animated style="width: 80px; height: 40px;"></ion-skeleton-text>
+            <ion-skeleton-text animated style="width: 30px; height: 24px;"></ion-skeleton-text>
+            <ion-skeleton-text animated style="width: 80px; height: 40px;"></ion-skeleton-text>
+          </div>
+        </ion-card-content>
+      </ion-card>
+    }
+  } @else if (filteredFixtures().length === 0) {
+    <!-- Empty state -->
+    <div class="empty-state">
+      <ion-icon name="football-outline" class="empty-icon"></ion-icon>
+      <h3>No hay partidos</h3>
+      <p>No se encontraron partidos para este filtro.</p>
+      <ion-button (click)="onRefresh($event)" fill="outline" color="primary">
+        <ion-icon name="refresh-outline" slot="start"></ion-icon>
+        Actualizar
+      </ion-button>
+    </div>
+  } @else {
+    <!-- Fixtures list -->
+    @for (fixture of filteredFixtures(); track trackByFixtureId($index, fixture)) {
+      <ion-card
+        [class.live-card]="fixturesService.isLive(fixture.status_short)"
+        button
+        (click)="navigateToFixture(fixture)"
+        color="dark">
+
+        <!-- League header -->
+        <div class="league-header">
+          <img [src]="fixture.league.logo" class="league-logo" alt="" />
+          <span class="league-name">{{ fixture.league.name }}</span>
+          <span class="league-round">{{ fixture.round }}</span>
+          <ion-chip [color]="getStatusColor(fixture.status_short)" class="status-chip">
+            {{ getStatusLabel(fixture.status_short) }}
+          </ion-chip>
+        </div>
+
+        <ion-card-content>
+          <div class="match-row">
+            <!-- Home team -->
+            <div class="team home-team">
+              <span class="team-id">{{ fixture.home_team_api_id }}</span>
+              <span class="team-label">Local</span>
+            </div>
+
+            <!-- Score / Time -->
+            <div class="score-section">
+              @if (fixturesService.isLive(fixture.status_short) || fixturesService.isFinished(fixture.status_short)) {
+                <span class="score">{{ fixture.goals_home ?? 0 }} - {{ fixture.goals_away ?? 0 }}</span>
+                @if (fixture.elapsed) {
+                  <span class="elapsed">{{ fixture.elapsed }}'</span>
+                }
+              } @else {
+                <span class="match-time">{{ formatTime(fixture.date) }}</span>
+              }
+            </div>
+
+            <!-- Away team -->
+            <div class="team away-team">
+              <span class="team-id">{{ fixture.away_team_api_id }}</span>
+              <span class="team-label">Visitante</span>
+            </div>
+          </div>
+        </ion-card-content>
+      </ion-card>
+    }
+  }
 </ion-content>
